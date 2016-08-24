@@ -8,6 +8,10 @@
  *
  */
 var neetjs = new (function () {
+    if (console === undefined) {
+        console = {};
+        console.log = function () {};
+    }
     var _mods = {};
     // 'this' is dom object
     var _render = function ($this, $scope) {
