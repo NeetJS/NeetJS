@@ -1,62 +1,10 @@
-/*
- * NeetJS
- * http://neetjs.org
- *
- * Copyright neetjs.org
- * Released under the MIT license
- * https://github.com/prchen-open/NeetJS/blob/master/LICENSE
- *
- */
-(function ($) {
-    // ignore output for browsers which not support console
-    var console = window.console;
+var neetjs = new (function () {
     if (console === undefined) {
         console = {};
         console.log = function () {};
     }
-
-    // loaded modules
     var _mods = {};
-
-    var loadFromContent = function (content) {
-        if (content === undefined) {
-            return;
-        }
-        var spacejq = $(document.createElement('body'));
-        spacejq.append(content);
-        $(spacejq).find('[nt-mod]').each(function () {
-            var name = $(this).attr('nt-mod');
-            // neetjs.loadmod(name, this);
-            if (_mods[name] !== undefined) {
-                console.log('NeetJS: Warn: redundant loadmod call for mod ' + name + ', ignored.');
-                return;
-            }
-            $(this).removeAttr('nt-mod');
-            // TODO change
-            $(this).find('style').appendTo('head');
-            _mods[name] = this;
-        });
-    };
-
-    var loadFromRemote = function (opt) {
-        var callback = opt.success;
-        opt.success = function (content) {
-            loadFromContent(content);
-            if ($.isFunction(callback)) {
-                callback(content);
-            }
-        };
-        $.ajax(opt);
-    };
-
-    var loadFromBody = function () {
-        $('body [nt-mod]').each(function () {
-            loadFromContent(this);
-            $(this).replaceWith();
-        });
-    };
-
-    // private recursive render function
+    // 'this' is dom object
     var _render = function ($this, $scope) {
         if (!$.isPlainObject($scope)) {
             console.log('NeetJS: Error: scope data should be plain object');
@@ -146,34 +94,53 @@
         });
     };
 
-    var ntrender = function (opt) {
-        this.each(function () {
-            var context = opt;
-            var mod = context.mod;
-            var selector = this;
-            var $scope = context.data;
-            if (_mods[mod] === undefined) {
-                console.log('NeetJS: Error: mod ' + mod + ' not found.');
-            }
-            var newdom = $(_mods[mod]).clone()[0];
-            $(document.createElement('html')).append(newdom);
-            $(newdom).each(function () {
-                try {
-                    _render(this, $scope);
-                } catch (e) {
-                    console.log('NeetJS: Error: ' + e);
-                }
-                $(selector).replaceWith(this);
+    this.loadmod = function (name, content) {
+        if (name === undefined && content === undefined) {
+            // if no arguments given, load from document
+            $('[nt-mod]').each(function () {
+                var name = $(this).attr('nt-mod');
+                $(this).removeAttr('nt-mod');
+                neetjs.loadmod(name, this);
+                $(this).replaceWith();
             });
+            return;
+        }
+        if (_mods[name] !== undefined) {
+            console.log('NeetJS: Warn: redundant loadmod call for mod ' + name + ', ignored.');
+            return;
+        }
+        var spacejq = $(document.createElement('body'));
+        spacejq.append(content);
+        if (spacejq.children().length !== 1) {
+            console.log('NeetJS: Error: mod ' + name + ' should have a root element.');
+        }
+        var dom = spacejq.children()[0];
+        _mods[name] = dom;
+        $(dom).find('style').appendTo('head');
+    };
+
+    this.render = function (context) {
+        var mod = context.mod;
+        var selector = context.dest;
+        var $scope = context.data;
+        if (_mods[mod] === undefined) {
+            console.log('NeetJS: Error: mod ' + mod + ' not found.');
+        }
+        var newdom = $(_mods[mod]).clone()[0];
+        $(document.createElement('html')).append(newdom);
+        $(newdom).each(function () {
+            try {
+                _render(this, $scope);
+            } catch (e) {
+                console.log('NeetJS: Error: ' + e);
+            }
+            $(selector).replaceWith(this);
         });
     };
 
-    // mount to jQuery
-    $.neetjs = {
-        loadFromContent:loadFromContent,
-        loadFromRemote:loadFromRemote,
-        loadFromBody:loadFromBody
-    };
-    $.fn.ntrender = ntrender;
+    // load mods from page when body is ready
+    $(function () {
+        neetjs.loadmod();
+    });
 
-})($);
+})();

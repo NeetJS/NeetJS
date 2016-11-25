@@ -1,11 +1,8 @@
 {
   "name": "NeetJS",
-  "version": "0.1.2-1",
+  "version": "0.1.0-0",
   "description": "Micro framework with modular programming support for web front end, based on jquery.",
   "main": "jquery.neet.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/prchen-open/NeetJS.git"
