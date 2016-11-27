@@ -16,7 +16,13 @@
     }
 
     // loaded modules
+    var _debug_mod = false;
     var _mods = {};
+
+    var setDebug = function (enable) {
+        enable = enable ? true : false;
+        _debug_mod = enable;
+    };
 
     var loadFromContent = function (content) {
         if (content === undefined) {
@@ -26,14 +32,20 @@
         spacejq.append(content);
         $(spacejq).find('[nt-mod]').each(function () {
             var name = $(this).attr('nt-mod');
-            // neetjs.loadmod(name, this);
             if (_mods[name] !== undefined) {
                 console.log('NeetJS: Warn: redundant loadmod call for mod ' + name + ', ignored.');
                 return;
             }
             $(this).removeAttr('nt-mod');
-            // TODO change
-            $(this).find('style').appendTo('head');
+            $(this).find('[nt-head]').each(function () {
+                $(this).removeAttr('nt-head');
+                var rid = $(this).attr('nt-resource-id');
+                if (rid && $('head [nt-resource-id=' + rid + ']').length > 0) {
+                    $(this).appendTo();
+                    return;
+                }
+                $(this).appendTo('head');
+            });
             _mods[name] = this;
         });
     };
@@ -65,6 +77,7 @@
         for (var _key in $scope) {
             eval('var '+_key+' = $scope[_key]');
         }
+        var _parent = $($this).parent();
         $($this).each(function () {
             //nt-if
             if ($(this).attr('nt-if') !== undefined) {
@@ -98,8 +111,9 @@
                         $scope[_kname] = _key;
                     }
                     $scope[_vname] = _data[_key];
-                    _render(clone, $scope);
+                    // insert before render
                     $($this).before(clone);
+                    _render(clone, $scope);
                 };
                 if ($.isArray(_data)) {
                     for (var _key = 0 ; _key < _data.length ; _key++) {
@@ -116,8 +130,7 @@
             //nt-include
             if ($(this).attr('nt-include') !== undefined) {
                 var ctx = eval('('+$(this).attr('nt-include')+')');
-                ctx['dest'] = this;
-                neetjs.render(ctx);
+                $(this).ntrender(ctx);
                 return;
             }
             //nt-attr
@@ -135,12 +148,11 @@
             if ($(this).attr('nt-eval') !== undefined) {
                 eval($(this).attr('nt-eval'));
                 $(this).removeAttr('nt-eval');
-                if (!$(this).parent().find(this).length) {
-                    // if this dom object is removed during eval, break
-                    return;
-                }
             }
         });
+        if (!_parent.find($this).length) {
+            return;
+        }
         $($this).children().each(function () {
             _render(this, $scope);
         });
@@ -162,6 +174,7 @@
                     _render(this, $scope);
                 } catch (e) {
                     console.log('NeetJS: Error: ' + e);
+                    throw e;
                 }
                 $(selector).replaceWith(this);
             });
@@ -170,6 +183,7 @@
 
     // mount to jQuery
     $.neetjs = {
+        setDebug:setDebug,
         loadFromContent:loadFromContent,
         loadFromRemote:loadFromRemote,
         loadFromBody:loadFromBody

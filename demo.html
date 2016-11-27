@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="demo.css" />
+<script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="jquery.neet.js"></script>
+<script type="text/javascript" src="demo.js"></script>
+<title>NeetJS Demo</title>
+</head>
+<body>
+
+<!-- neetjs mods -->
+
+<table nt-mod="org-neetjs-demo-studenttable">
+    <thead>
+        <tr>
+            <th>Student ID</th><th>Name</th><th>Mobile</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr nt-if="!students || !students.length">
+            <td colspan="4">No students to be display</td>
+        </tr>
+        <tr nt-repeat="students as row">
+            <td nt-html="row.id"></td>
+            <td nt-html="row.name"></td>
+            <td nt-html="row.mobile"></td>
+        </tr>
+    </tbody>
+</table>
+
+<table nt-mod="org-neetjs-demo-stafftable">
+    <meta charset="utf-8" nt-head nt-resource-id="123"/>
+    <thead>
+        <tr>
+            <th>Staff ID</th><th>Name</th><th>Office</th><th>Mobile</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr nt-if="!staffs || !staffs.length">
+            <td colspan="4">No staffs to be display</td>
+        </tr>
+        <tr nt-repeat="staffs as row">
+            <td nt-html="row.id"></td>
+            <td nt-html="row.name"></td>
+            <td nt-html="row.office"></td>
+            <td nt-html="row.mobile"></td>
+        </tr>
+    </tbody>
+</table>
+
+<div nt-mod="org-neetjs-demo-allpage" class="mainpanel left">
+    <meta charset="utf-8" nt-head nt-resource-id="123"/>
+    <div nt-include="{'mod': 'org-neetjs-demo-studenttable', 'data': $scope}"></div>
+    <div nt-include="{'mod': 'org-neetjs-demo-stafftable', 'data': $scope}"></div>
+</div>
+
+<div nt-mod="org-neetjs-demo-studentpage" class="mainpanel left">
+    <div nt-include="{'mod': 'org-neetjs-demo-studenttable', 'data': $scope}"></div>
+</div>
+
+<div nt-mod="org-neetjs-demo-staffpage" class="mainpanel left">
+    <div nt-include="{'mod': 'org-neetjs-demo-stafftable', 'data': $scope}"></div>
+</div>
+
+<!-- body -->
+<div class="header">NeetJS Demo Web Page</div>
+<div class="content">
+    <div class="sidemenu left">
+        <li><a href="javascript:demo_load_all()">all</a></li>
+        <li><a href="javascript:demo_load_student()">student</a></li>
+        <li><a href="javascript:demo_load_staff()">staff</a></li>
+    </div>
+    <div class="mainpanel left"></div>
+    <div class="clear"></div>
+</div>
+<div class="footer">
+    <span>Copyright 2016 neetjs.org | Released Under MIT License</span>
+</div>
+
+</body>
+</html>
