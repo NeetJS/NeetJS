@@ -1,28 +1,49 @@
+var students_class_a = [
+	{'id': '10001', 'name': 'Winston', 'mobile': '+xx xxxx-xxx-xxxx'},
+	{'id': '10002', 'name': 'Reinhardt', 'mobile': '+xx xxxx-xxx-xxxx'}
+];
+var students_class_b = [
+	{'id': '10003', 'name': 'Sombra', 'mobile': '+xx xxxx-xxx-xxxx'}
+];
+var students_class_c = [
+];
+var students_all = [].concat(students_class_a, students_class_b, students_class_c);
+var staffs = [
+	{'id': '20001', 'name': 'Anna', 'office': 'Room 101, Building A', 'mobile': '+xx xxxx-xxx-xxxx'}
+];
+
 var demo_load_all = function () {
 	$('.mainpanel').empty();
 	$('.mainpanel').ntrender({
 		'mod': 'org-neetjs-demo-allpage',
 		'data': {
-			'students': [
-				{'id': '10001', 'name': 'Winston', 'mobile': '+xx xxxx-xxx-xxxx'},
-				{'id': '10002', 'name': 'Reinhardt', 'mobile': '+xx xxxx-xxx-xxxx'},
-				{'id': '10003', 'name': 'Anna', 'mobile': '+xx xxxx-xxx-xxxx'}
-			],
-			'staffs': []
+			'students': students_all,
+			'staffs': staffs
 		}
 	});
 };
 
-var demo_load_student = function () {
+var demo_load_student = function (type) {
+	var students = [];
+	switch(type) {
+	case 'a':
+		students = students_class_a;
+		break;
+	case 'b':
+		students = students_class_b;
+		break;
+	case 'c':
+		students = students_class_c;
+		break;
+	default:
+		students = students_all;
+		break;
+	}
 	$('.mainpanel').empty();
 	$('.mainpanel').ntrender({
 		'mod': 'org-neetjs-demo-studentpage',
 		'data': {
-			'students': [
-				{'id': '10001', 'name': 'Winston', 'mobile': '+xx xxxx-xxx-xxxx'},
-				{'id': '10002', 'name': 'Reinhardt', 'mobile': '+xx xxxx-xxx-xxxx'},
-				{'id': '10003', 'name': 'Anna', 'mobile': '+xx xxxx-xxx-xxxx'}
-			]
+			'students': students
 		}
 	});
 };
@@ -32,12 +53,7 @@ var demo_load_staff = function () {
 	$('.mainpanel').ntrender({
 		'mod': 'org-neetjs-demo-staffpage',
 		'data': {
-			'students': [
-				{'id': '10001', 'name': 'Winston', 'mobile': '+xx xxxx-xxx-xxxx'},
-				{'id': '10002', 'name': 'Reinhardt', 'mobile': '+xx xxxx-xxx-xxxx'},
-				{'id': '10003', 'name': 'Anna', 'mobile': '+xx xxxx-xxx-xxxx'}
-			],
-			'staffs': []
+			'staffs': staffs
 		}
 	});
 };

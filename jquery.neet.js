@@ -149,6 +149,10 @@
                 eval($(this).attr('nt-eval'));
                 $(this).removeAttr('nt-eval');
             }
+            //nt-remove
+            if ($(this).attr('nt-remove') !== undefined) {
+                $(this).replaceWith();
+            }
         });
         if (!_parent.find($this).length) {
             return;
@@ -190,4 +194,4 @@
     };
     $.fn.ntrender = ntrender;
 
-})($);
+})(jQuery);
