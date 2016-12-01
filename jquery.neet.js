@@ -8,20 +8,41 @@
  *
  */
 (function ($) {
-    // ignore output for browsers which not support console
-    var console = window.console;
-    if (console === undefined) {
-        console = {};
-        console.log = function () {};
-    }
-
-    // loaded modules
     var _debug_mod = false;
+    var _loaders = {};
     var _mods = {};
+
+    var log = new (function () {
+        // ignore output for browsers which not support console
+        var console = window.console;
+        if (console === undefined) {
+            console = {};
+            console.log = function () {};
+        }
+        this.error = function (msg) {
+            console.log('NeetJS ERROR - ' + msg);
+        };
+        this.warn = function (msg) {
+            console.log('NeetJS WARN - ' + msg);
+        };
+        this.info = function (msg) {
+            console.log('NeetJS INFO - ' + msg);
+        };
+        this.debug = function (msg) {
+            console.log('NeetJS DEBUG - ' + msg);
+        };
+    })();
 
     var setDebug = function (enable) {
         enable = enable ? true : false;
         _debug_mod = enable;
+    };
+
+    var addModLoader = function (name, loader) {
+        if (_loaders[name] !== undefined) {
+            log.warn('redundant mod loader added named ' + name + ', override.');
+        }
+        _loaders[name] = loader;
     };
 
     var loadFromContent = function (content) {
@@ -33,7 +54,7 @@
         $(spacejq).find('[nt-mod]').each(function () {
             var name = $(this).attr('nt-mod');
             if (_mods[name] !== undefined) {
-                console.log('NeetJS: Warn: redundant loadmod call for mod ' + name + ', ignored.');
+                log.warn('redundant loadmod call for mod ' + name + ', ignore.');
                 return;
             }
             $(this).removeAttr('nt-mod');
@@ -71,7 +92,7 @@
     // private recursive render function
     var _render = function ($this, $scope) {
         if (!$.isPlainObject($scope)) {
-            console.log('NeetJS: Error: scope data should be plain object');
+            log.error('scope data should be plain object');
         }
         // import scope variables
         for (var _key in $scope) {
@@ -101,7 +122,7 @@
                     _kname = arr[2];
                     _vname = arr[4];
                 } else {
-                    console.log("NeetJS: Error: repeat declaration should match to 'dataset as value' or 'dataset as key : value'");
+                    log.error("repeat declaration should match to 'dataset as value' or 'dataset as key : value'");
                 }
                 $(this).removeAttr('nt-repeat');
                 var _data = eval(_dname);
@@ -127,11 +148,36 @@
                 $(this).replaceWith();
                 return;
             }
-            //nt-include
-            if ($(this).attr('nt-include') !== undefined) {
-                var ctx = eval('('+$(this).attr('nt-include')+')');
-                $(this).ntrender(ctx);
+            //nt-replace
+            if ($(this).attr('nt-replace') !== undefined) {
+                var ctx = eval('('+$(this).attr('nt-replace')+')');
+                $(this).ntReplace(ctx);
                 return;
+            }
+            //nt-inject
+            if ($(this).attr('nt-inject') !== undefined) {
+                var ctx = eval('('+$(this).attr('nt-inject')+')');
+                $(this).ntInject(ctx);
+            }
+            //nt-prepend
+            if ($(this).attr('nt-prepend') !== undefined) {
+                var ctx = eval('('+$(this).attr('nt-prepend')+')');
+                $(this).ntPrepend(ctx);
+            }
+            //nt-append
+            if ($(this).attr('nt-append') !== undefined) {
+                var ctx = eval('('+$(this).attr('nt-append')+')');
+                $(this).ntAppend(ctx);
+            }
+            //nt-before
+            if ($(this).attr('nt-before') !== undefined) {
+                var ctx = eval('('+$(this).attr('nt-before')+')');
+                $(this).ntBefore(ctx);
+            }
+            //nt-after
+            if ($(this).attr('nt-after') !== undefined) {
+                var ctx = eval('('+$(this).attr('nt-after')+')');
+                $(this).ntAfter(ctx);
             }
             //nt-attr
             if ($(this).attr('nt-attr') !== undefined) {
@@ -162,14 +208,14 @@
         });
     };
 
-    var ntrender = function (opt) {
-        this.each(function () {
+    var ntrender = function (jqobj, opt, method) {
+        jqobj.each(function () {
             var context = opt;
             var mod = context.mod;
-            var selector = this;
+            var selector = jqobj;
             var $scope = context.data;
             if (_mods[mod] === undefined) {
-                console.log('NeetJS: Error: mod ' + mod + ' not found.');
+                log.error('mod ' + mod + ' not found.');
             }
             var newdom = $(_mods[mod]).clone()[0];
             $(document.createElement('html')).append(newdom);
@@ -177,10 +223,31 @@
                 try {
                     _render(this, $scope);
                 } catch (e) {
-                    console.log('NeetJS: Error: ' + e);
+                    log.error('' + e);
                     throw e;
                 }
-                $(selector).replaceWith(this);
+                switch (method){
+                    case 'ntReplace':
+                        $(selector).replaceWith(this);
+                        break;
+                    case 'ntInject':
+                        $(selector).empty();
+                    case 'ntPrepend':
+                        $(selector).prepend(this);
+                        break;
+                    case 'ntAppend':
+                        $(selector).append(this);
+                        break;
+                    case 'ntBefore':
+                        $(selector).before(this);
+                        break;
+                    case 'ntAfter':
+                        $(selector).after(this);
+                        break;
+                    default:
+                        log.error('Unexpected case.');
+                        break;
+                }
             });
         });
     };
@@ -192,6 +259,23 @@
         loadFromRemote:loadFromRemote,
         loadFromBody:loadFromBody
     };
-    $.fn.ntrender = ntrender;
+    $.fn.ntReplace = function (opt) {
+        ntrender(this, opt, 'ntReplace');
+    };
+    $.fn.ntInject = function (opt) {
+        ntrender(this, opt, 'ntInject');
+    };
+    $.fn.ntPrepend = function (opt) {
+        ntrender(this, opt, 'ntPrepend');
+    };
+    $.fn.ntAppend = function (opt) {
+        ntrender(this, opt, 'ntAppend');
+    };
+    $.fn.ntBefore = function (opt) {
+        ntrender(this, opt, 'ntBefore');
+    };
+    $.fn.ntAfter = function (opt) {
+        ntrender(this, opt, 'ntAfter');
+    };
 
 })(jQuery);
