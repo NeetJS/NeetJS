@@ -2,7 +2,9 @@
   "name": "NeetJS",
   "version": "0.1.0-0",
   "description": "Micro framework with modular programming support for web front end, based on jquery.",
-  "main": "jquery.neet.js",
+  "files": [
+    "jquery.neet.js"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/prchen-open/NeetJS.git"
@@ -10,7 +12,7 @@
   "keywords": [
     "neetjs",
     "javascript",
-    "jquery"
+    "jquery-plugin"
   ],
   "author": "Peiran Chen",
   "license": "MIT",

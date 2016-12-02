@@ -7,6 +7,7 @@
  * https://github.com/prchen-open/NeetJS/blob/master/LICENSE
  *
  */
+
 (function ($) {
     var _debug_mod = false;
     var _loaders = {};
@@ -259,6 +260,7 @@
         loadFromRemote:loadFromRemote,
         loadFromBody:loadFromBody
     };
+
     $.fn.ntReplace = function (opt) {
         ntrender(this, opt, 'ntReplace');
     };
