@@ -13,7 +13,6 @@ var staffs = [
 ];
 
 var demo_load_all = function () {
-	$('.mainpanel').empty();
 	$('.mainpanel').ntReplace({
 		'mod': 'org-neetjs-demo-allpage',
 		'data': {
@@ -39,7 +38,6 @@ var demo_load_student = function (type) {
 		students = students_all;
 		break;
 	}
-	$('.mainpanel').empty();
 	$('.mainpanel').ntReplace({
 		'mod': 'org-neetjs-demo-studentpage',
 		'data': {
@@ -49,7 +47,6 @@ var demo_load_student = function (type) {
 };
 
 var demo_load_staff = function () {
-	$('.mainpanel').empty();
 	$('.mainpanel').ntReplace({
 		'mod': 'org-neetjs-demo-staffpage',
 		'data': {
@@ -59,7 +56,11 @@ var demo_load_staff = function () {
 };
 
 $(function () {
-	$.neetjs.setDebug(true);
-	$.neetjs.loadFromBody();
+	$.neetjs.addModLoader({
+		name: 'myloader',
+		loader: function (mod) {
+			$.neetjs.loadFromBody();
+		}
+	});
 	demo_load_all();
 });

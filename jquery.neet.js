@@ -10,40 +10,84 @@
 
 (function ($) {
     var _debug_mod = false;
-    var _loaders = {};
+    var _loaders_idx = [];
+    var _loaders_name = {};
     var _mods = {};
+
+    var setDebugMode = function (enable) {
+        enable = enable ? true : false;
+        _debug_mod = enable;
+    };
 
     var log = new (function () {
         // ignore output for browsers which not support console
         var console = window.console;
         if (console === undefined) {
-            console = {};
-            console.log = function () {};
+            console = {
+                log: $.noop,
+                error: $.noop,
+                warn: $.noop,
+                info: $.noop,
+                debug: $.noop,
+                trace: $.noop
+            };
         }
         this.error = function (msg) {
-            console.log('NeetJS ERROR - ' + msg);
+            console.error('NeetJS ERROR - ' + msg);
+            if (_debug_mod) {
+                console.trace('Debug stack trace...');
+            }
         };
         this.warn = function (msg) {
-            console.log('NeetJS WARN - ' + msg);
+            console.warn('NeetJS WARN - ' + msg);
+            if (_debug_mod) {
+                console.trace('Debug stack trace...');
+            }
         };
         this.info = function (msg) {
-            console.log('NeetJS INFO - ' + msg);
+            console.info('NeetJS INFO - ' + msg);
+            if (_debug_mod) {
+                console.trace('Debug stack trace...');
+            }
         };
         this.debug = function (msg) {
-            console.log('NeetJS DEBUG - ' + msg);
+            console.debug('NeetJS DEBUG - ' + msg);
+            if (_debug_mod) {
+                console.trace('Debug stack trace...');
+            }
         };
     })();
 
-    var setDebug = function (enable) {
-        enable = enable ? true : false;
-        _debug_mod = enable;
-    };
-
-    var addModLoader = function (name, loader) {
-        if (_loaders[name] !== undefined) {
+    var addModLoader = function (obj) {
+        var name = obj.name;
+        var loader = obj.loader;
+        if (name === undefined) {
+            log.error('Mod loader should match the pattern of {name: \'loaderName\', loader: function (mod) {...} }.');
+            return;
+        }
+        if (loader === undefined || !$.isFunction(loader)) {
+            log.error('Mod loader should match the pattern of {name: \'loaderName\', loader: function (mod) {...} }.');
+            return;
+        }
+        if (_loaders_name[name] !== undefined) {
             log.warn('redundant mod loader added named ' + name + ', override.');
         }
-        _loaders[name] = loader;
+        _loaders_idx.push(loader);
+        _loaders_name[name] = loader;
+    };
+
+    var _getMod = function (mod_name) {
+        if (_mods[mod_name] !== undefined) {
+            return _mods[mod_name];
+        }
+        for (var idx in _loaders_idx) {
+            var loader = _loaders_idx[idx];
+            loader(mod_name);
+            if (_mods[mod_name] !== undefined) {
+                return _mods[mod_name];
+            }
+        }
+        throw 'Cannot load mod \'' + mod_name + '\'.';
     };
 
     var loadFromContent = function (content) {
@@ -123,7 +167,7 @@
                     _kname = arr[2];
                     _vname = arr[4];
                 } else {
-                    log.error("repeat declaration should match to 'dataset as value' or 'dataset as key : value'");
+                    throw 'nt-repeat declaration should match to \'dataset as value\' or \'dataset as key : value\'';
                 }
                 $(this).removeAttr('nt-repeat');
                 var _data = eval(_dname);
@@ -209,44 +253,34 @@
         });
     };
 
-    var ntrender = function (jqobj, opt, method) {
+    var _nt_render = function (jqobj, opt, method) {
         jqobj.each(function () {
-            var context = opt;
-            var mod = context.mod;
-            var selector = jqobj;
-            var $scope = context.data;
-            if (_mods[mod] === undefined) {
-                log.error('mod ' + mod + ' not found.');
-            }
-            var newdom = $(_mods[mod]).clone()[0];
+            var mod = _getMod(opt.mod);
+            var $scope = opt.data;
+            var newdom = $(mod).clone()[0];
             $(document.createElement('html')).append(newdom);
             $(newdom).each(function () {
-                try {
-                    _render(this, $scope);
-                } catch (e) {
-                    log.error('' + e);
-                    throw e;
-                }
+                _render(this, $scope);
                 switch (method){
                     case 'ntReplace':
-                        $(selector).replaceWith(this);
+                        jqobj.replaceWith(this);
                         break;
                     case 'ntInject':
-                        $(selector).empty();
+                        jqobj.empty();
                     case 'ntPrepend':
-                        $(selector).prepend(this);
+                        jqobj.prepend(this);
                         break;
                     case 'ntAppend':
-                        $(selector).append(this);
+                        jqobj.append(this);
                         break;
                     case 'ntBefore':
-                        $(selector).before(this);
+                        jqobj.before(this);
                         break;
                     case 'ntAfter':
-                        $(selector).after(this);
+                        jqobj.after(this);
                         break;
                     default:
-                        log.error('Unexpected case.');
+                        throw 'Unexpected case.';
                         break;
                 }
             });
@@ -255,29 +289,29 @@
 
     // mount to jQuery
     $.neetjs = {
-        setDebug:setDebug,
+        setDebugMode:setDebugMode,
         loadFromContent:loadFromContent,
         loadFromRemote:loadFromRemote,
         loadFromBody:loadFromBody
     };
 
     $.fn.ntReplace = function (opt) {
-        ntrender(this, opt, 'ntReplace');
+        _nt_render(this, opt, 'ntReplace');
     };
     $.fn.ntInject = function (opt) {
-        ntrender(this, opt, 'ntInject');
+        _nt_render(this, opt, 'ntInject');
     };
     $.fn.ntPrepend = function (opt) {
-        ntrender(this, opt, 'ntPrepend');
+        _nt_render(this, opt, 'ntPrepend');
     };
     $.fn.ntAppend = function (opt) {
-        ntrender(this, opt, 'ntAppend');
+        _nt_render(this, opt, 'ntAppend');
     };
     $.fn.ntBefore = function (opt) {
-        ntrender(this, opt, 'ntBefore');
+        _nt_render(this, opt, 'ntBefore');
     };
     $.fn.ntAfter = function (opt) {
-        ntrender(this, opt, 'ntAfter');
+        _nt_render(this, opt, 'ntAfter');
     };
 
 })(jQuery);
