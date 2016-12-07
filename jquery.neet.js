@@ -9,14 +9,14 @@
  */
 
 (function ($) {
-    var _debug_mod = false;
+    var _debug_mode = false;
     var _loaders_idx = [];
     var _loaders_name = {};
-    var _mods = {};
+    var _classes = {};
 
     var setDebugMode = function (enable) {
         enable = enable ? true : false;
-        _debug_mod = enable;
+        _debug_mode = enable;
     };
 
     var log = new (function () {
@@ -34,60 +34,60 @@
         }
         this.error = function (msg) {
             console.error('NeetJS ERROR - ' + msg);
-            if (_debug_mod) {
+            if (_debug_mode) {
                 console.trace('Debug stack trace...');
             }
         };
         this.warn = function (msg) {
             console.warn('NeetJS WARN - ' + msg);
-            if (_debug_mod) {
+            if (_debug_mode) {
                 console.trace('Debug stack trace...');
             }
         };
         this.info = function (msg) {
             console.info('NeetJS INFO - ' + msg);
-            if (_debug_mod) {
+            if (_debug_mode) {
                 console.trace('Debug stack trace...');
             }
         };
         this.debug = function (msg) {
             console.debug('NeetJS DEBUG - ' + msg);
-            if (_debug_mod) {
+            if (_debug_mode) {
                 console.trace('Debug stack trace...');
             }
         };
     })();
 
-    var addModLoader = function (obj) {
+    var addClassLoader = function (obj) {
         var name = obj.name;
         var loader = obj.loader;
         if (name === undefined) {
-            log.error('Mod loader should match the pattern of {name: \'loaderName\', loader: function (mod) {...} }.');
+            log.error('Class loader should match the pattern of {name: \'loaderName\', loader: function (class) {...} }.');
             return;
         }
         if (loader === undefined || !$.isFunction(loader)) {
-            log.error('Mod loader should match the pattern of {name: \'loaderName\', loader: function (mod) {...} }.');
+            log.error('Class loader should match the pattern of {name: \'loaderName\', loader: function (class) {...} }.');
             return;
         }
         if (_loaders_name[name] !== undefined) {
-            log.warn('redundant mod loader added named ' + name + ', override.');
+            log.warn('redundant class loader added named ' + name + ', override.');
         }
         _loaders_idx.push(loader);
         _loaders_name[name] = loader;
     };
 
-    var _getMod = function (mod_name) {
-        if (_mods[mod_name] !== undefined) {
-            return _mods[mod_name];
+    var _getClass = function (classname) {
+        if (_classes[classname] !== undefined) {
+            return _classes[classname];
         }
         for (var idx in _loaders_idx) {
             var loader = _loaders_idx[idx];
-            loader(mod_name);
-            if (_mods[mod_name] !== undefined) {
-                return _mods[mod_name];
+            loader(classname);
+            if (_classes[classname] !== undefined) {
+                return _classes[classname];
             }
         }
-        throw 'Cannot load mod \'' + mod_name + '\'.';
+        throw 'Cannot load class \'' + classname + '\'.';
     };
 
     var loadFromContent = function (content) {
@@ -96,13 +96,13 @@
         }
         var spacejq = $(document.createElement('body'));
         spacejq.append(content);
-        $(spacejq).find('[nt-mod]').each(function () {
-            var name = $(this).attr('nt-mod');
-            if (_mods[name] !== undefined) {
-                log.warn('redundant loadmod call for mod ' + name + ', ignore.');
+        $(spacejq).find('[nt-class]').each(function () {
+            var name = $(this).attr('nt-class');
+            if (_classes[name] !== undefined) {
+                log.warn('redundant loadclass called for class ' + name + ', ignore.');
                 return;
             }
-            $(this).removeAttr('nt-mod');
+            $(this).removeAttr('nt-class');
             $(this).find('[nt-head]').each(function () {
                 $(this).removeAttr('nt-head');
                 var rid = $(this).attr('nt-resource-id');
@@ -112,7 +112,7 @@
                 }
                 $(this).appendTo('head');
             });
-            _mods[name] = this;
+            _classes[name] = this;
         });
     };
 
@@ -128,14 +128,82 @@
     };
 
     var loadFromBody = function () {
-        $('body [nt-mod]').each(function () {
+        $('body [nt-class]').each(function () {
             loadFromContent(this);
             $(this).replaceWith();
         });
     };
 
+    var _RCtx = function () {
+        var element, scope, parent, ifexists, ifresult;
+        this.getElement = function () {
+            return element;
+        };
+        this.setElement = function (arg) {
+            element = arg;
+        };
+        this.getScope = function () {
+            return scope;
+        };
+        this.setScope = function (arg) {
+            scope = arg;
+        };
+        this.getParent = function () {
+            return parent;
+        };
+        this.setParent = function (arg) {
+            parent = arg;
+        };
+        this.getIfexists = function () {
+            return ifexists ? true : false;
+        }
+        this.setIfexists = function (arg) {
+            ifexists = arg;
+        };
+        this.getIfresult = function () {
+            return ifresult;
+        };
+        this.setIfresult = function (arg) {
+            ifresult = arg;
+        };
+        this.updateIf = function (result) {
+            ifexists = true;
+            ifresult = result;
+        };
+        this.endIf = function () {
+            ifexists = false;
+        };
+        this.createBrother = function (brotherElement) {
+            var bean = new _RCtx();
+            bean.setElement(brotherElement);
+            bean.setScope(scope);
+            bean.setParent(parent);
+            bean.setIfexists(ifexists);
+            bean.setIfresult(ifresult);
+            return bean;
+        };
+        this.createChild = function (childElement) {
+            var bean = new _RCtx();
+            bean.setElement(childElement);
+            bean.setScope(scope);
+            bean.setParent(this);
+            return bean;
+        };
+    };
+    _RCtx.getInitContext = function (element, data) {
+        var parent = new _RCtx();
+        var bean = new _RCtx();
+        bean.setElement(element);
+        bean.setScope(data);
+        bean.setParent(parent);
+        return bean;
+    };
+
     // private recursive render function
-    var _render = function ($this, $scope) {
+    var _render = function ($context) {
+        var $this = $context.getElement();
+        var $scope = $context.getScope();
+        // make a copy
         if (!$.isPlainObject($scope)) {
             log.error('scope data should be plain object');
         }
@@ -145,14 +213,46 @@
         }
         var _parent = $($this).parent();
         $($this).each(function () {
-            //nt-if
+            //nt-if nt-elseif nt-else
             if ($(this).attr('nt-if') !== undefined) {
                 if (eval($(this).attr('nt-if'))) {
+                    $context.getParent().updateIf(true);
                     $(this).removeAttr('nt-if');
                 } else {
+                    $context.getParent().updateIf(false);
                     $(this).replaceWith();
                     return;
                 }
+            } else if ($(this).attr('nt-elseif') !== undefined) {
+                if (!$context.getParent().getIfexists()) {
+                    log.error('Cannot find \'if\' or \'elseif\' cases.');
+                    return;
+                }
+                if ($context.getParent().getIfresult()) {
+                    $(this).replaceWith();
+                    return;
+                } else if (eval($(this).attr('nt-elseif'))) {
+                    $context.getParent().updateIf(true);
+                    $(this).removeAttr('nt-elseif');
+                } else {
+                    $context.getParent().updateIf(false);
+                    $(this).replaceWith();
+                    return;
+                }
+            } else if ($(this).attr('nt-else') !== undefined) {
+                if (!$context.getParent().getIfexists()) {
+                    log.error('Cannot find \'if\' or \'elseif\' cases.');
+                    return;
+                }
+                if ($context.getParent().getIfresult()) {
+                    $(this).replaceWith();
+                    return;
+                } else {
+                    $context.getParent().updateIf(true);
+                    $(this).removeAttr('nt-else');
+                }
+            } else {
+                $context.getParent().endIf();
             }
             //nt-repeat
             if ($(this).attr('nt-repeat') !== undefined) {
@@ -179,7 +279,7 @@
                     $scope[_vname] = _data[_key];
                     // insert before render
                     $($this).before(clone);
-                    _render(clone, $scope);
+                    _render($context.createBrother(clone));
                 };
                 if ($.isArray(_data)) {
                     for (var _key = 0 ; _key < _data.length ; _key++) {
@@ -249,35 +349,34 @@
             return;
         }
         $($this).children().each(function () {
-            _render(this, $scope);
+            _render($context.createChild(this));
         });
     };
 
-    var _nt_render = function (jqobj, opt, method) {
-        jqobj.each(function () {
-            var mod = _getMod(opt.mod);
-            var $scope = opt.data;
-            var newdom = $(mod).clone()[0];
+    var _ntrender = function (jq, opt, method) {
+        jq.each(function () {
+            var newdom = $(_getClass(opt['class'])).clone()[0];
+            var $scope = opt['data'];
             $(document.createElement('html')).append(newdom);
             $(newdom).each(function () {
-                _render(this, $scope);
+                _render(_RCtx.getInitContext(this, $scope));
                 switch (method){
                     case 'ntReplace':
-                        jqobj.replaceWith(this);
+                        jq.replaceWith(this);
                         break;
                     case 'ntInject':
-                        jqobj.empty();
+                        jq.empty();
                     case 'ntPrepend':
-                        jqobj.prepend(this);
+                        jq.prepend(this);
                         break;
                     case 'ntAppend':
-                        jqobj.append(this);
+                        jq.append(this);
                         break;
                     case 'ntBefore':
-                        jqobj.before(this);
+                        jq.before(this);
                         break;
                     case 'ntAfter':
-                        jqobj.after(this);
+                        jq.after(this);
                         break;
                     default:
                         throw 'Unexpected case.';
@@ -290,28 +389,29 @@
     // mount to jQuery
     $.neetjs = {
         setDebugMode:setDebugMode,
+        addClassLoader:addClassLoader,
         loadFromContent:loadFromContent,
         loadFromRemote:loadFromRemote,
         loadFromBody:loadFromBody
     };
 
     $.fn.ntReplace = function (opt) {
-        _nt_render(this, opt, 'ntReplace');
+        _ntrender(this, opt, 'ntReplace');
     };
     $.fn.ntInject = function (opt) {
-        _nt_render(this, opt, 'ntInject');
+        _ntrender(this, opt, 'ntInject');
     };
     $.fn.ntPrepend = function (opt) {
-        _nt_render(this, opt, 'ntPrepend');
+        _ntrender(this, opt, 'ntPrepend');
     };
     $.fn.ntAppend = function (opt) {
-        _nt_render(this, opt, 'ntAppend');
+        _ntrender(this, opt, 'ntAppend');
     };
     $.fn.ntBefore = function (opt) {
-        _nt_render(this, opt, 'ntBefore');
+        _ntrender(this, opt, 'ntBefore');
     };
     $.fn.ntAfter = function (opt) {
-        _nt_render(this, opt, 'ntAfter');
+        _ntrender(this, opt, 'ntAfter');
     };
 
 })(jQuery);

@@ -11,13 +11,13 @@
 
 <!-- neetjs mods -->
 
-<div nt-mod="org-neetjs-demo-tableinfo">
+<div nt-class="org-neetjs-demo-tableinfo">
     <p nt-if="type == 'students'">Students:</p>
-    <p nt-if="type == 'staffs'">Staffs:</p>
-    <p nt-if="type == 'all'">Students and staffs:</p>
+    <p nt-elseif="type == 'staffs'">Staffs:</p>
+    <p nt-else>Students and staffs:</p>
 </div>
 
-<div nt-mod="org-neetjs-demo-studenttable">
+<div nt-class="org-neetjs-demo-studenttable">
     <table>
         <thead>
             <tr>
@@ -37,7 +37,7 @@
     </table>
 </div>
 
-<div nt-mod="org-neetjs-demo-stafftable">
+<div nt-class="org-neetjs-demo-stafftable">
     <table>
         <meta charset="utf-8" nt-head nt-resource-id="123"/>
         <thead>
@@ -59,21 +59,21 @@
     </table>
 </div>
 
-<div nt-mod="org-neetjs-demo-allpage" class="mainpanel left">
+<div nt-class="org-neetjs-demo-allpage" class="mainpanel left">
     <span nt-eval="$scope.type = 'all'" nt-remove></span>
-    <div nt-replace="{'mod': 'org-neetjs-demo-tableinfo', 'data': $scope}"></div>
-    <div nt-replace="{'mod': 'org-neetjs-demo-studenttable', 'data': $scope}"></div>
-    <div nt-replace="{'mod': 'org-neetjs-demo-stafftable', 'data': $scope}"></div>
+    <div nt-replace="{'class': 'org-neetjs-demo-tableinfo', 'data': $scope}"></div>
+    <div nt-replace="{'class': 'org-neetjs-demo-studenttable', 'data': $scope}"></div>
+    <div nt-replace="{'class': 'org-neetjs-demo-stafftable', 'data': $scope}"></div>
 </div>
 
-<div nt-mod="org-neetjs-demo-studentpage" class="mainpanel left">
-    <div nt-replace="{'mod': 'org-neetjs-demo-tableinfo', 'data': {'type': 'students'}}"></div>
-    <div nt-replace="{'mod': 'org-neetjs-demo-studenttable', 'data': $scope}"></div>
+<div nt-class="org-neetjs-demo-studentpage" class="mainpanel left">
+    <div nt-replace="{'class': 'org-neetjs-demo-tableinfo', 'data': {'type': 'students'}}"></div>
+    <div nt-replace="{'class': 'org-neetjs-demo-studenttable', 'data': $scope}"></div>
 </div>
 
-<div nt-mod="org-neetjs-demo-staffpage" class="mainpanel left">
-    <div nt-replace="{'mod': 'org-neetjs-demo-tableinfo', 'data': {'type': 'staffs'}}"></div>
-    <div nt-replace="{'mod': 'org-neetjs-demo-stafftable', 'data': $scope}"></div>
+<div nt-class="org-neetjs-demo-staffpage" class="mainpanel left">
+    <div nt-replace="{'class': 'org-neetjs-demo-tableinfo', 'data': {'type': 'staffs'}}"></div>
+    <div nt-replace="{'class': 'org-neetjs-demo-stafftable', 'data': $scope}"></div>
 </div>
 
 <!-- body -->
