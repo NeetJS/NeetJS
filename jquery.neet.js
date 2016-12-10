@@ -131,8 +131,7 @@
                 }
                 $(this).appendTo('head');
             });
-            _classes[name] = $(this).find('[nt-body]')[0];
-            console.log(_classes[name])
+            _classes[name] = $(this).find('[nt-body]').html();
         });
     };
 
@@ -366,6 +365,7 @@
             }
         });
         if (!_parent.find($this).length) {
+            // log.debug('node removed');
             return;
         }
         $($this).children().each(function () {
@@ -375,31 +375,30 @@
 
     var _ntrender = function (jq, opt, method) {
         jq.each(function () {
-            var newdom = $(_getClass(opt['class'])).clone()[0];
-            var $scope = opt['data'];
-            $(document.createElement('html')).append(newdom);
-            $(newdom).each(function () {
+            var $scope = opt['data'] === undefined ? {} : opt['data'];
+            var html = document.createElement('html');
+            var body = document.createElement('body');
+            $(html).append(body);
+            $(body).html(_getClass(opt['class']));
+            $(body).each(function () {
                 _render(_RCtx.getInitContext(this, $scope));
                 switch (method){
                     case 'ntReplace':
-                        jq.replaceWith(this);
+                        jq.replaceWith($(this).html());
                         break;
                     case 'ntInject':
                         jq.empty();
                     case 'ntPrepend':
-                        jq.prepend(this);
+                        jq.prepend($(this).html());
                         break;
                     case 'ntAppend':
-                        jq.append(this);
+                        jq.append($(this).html());
                         break;
                     case 'ntBefore':
-                        jq.before(this);
+                        jq.before($(this).html());
                         break;
                     case 'ntAfter':
-                        jq.after(this);
-                        break;
-                    default:
-                        throw 'Unexpected case.';
+                        jq.after($(this).html());
                         break;
                 }
             });

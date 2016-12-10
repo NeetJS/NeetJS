@@ -54,13 +54,3 @@ var demo_load_staff = function () {
 		}
 	});
 };
-
-$(function () {
-	$.neetjs.addClassLoader({
-		name: 'myloader',
-		loader: function (classname) {
-			$.neetjs.loadFromBody();
-		}
-	});
-	demo_load_all();
-});
