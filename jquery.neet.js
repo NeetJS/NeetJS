@@ -387,7 +387,8 @@
                         jq.replaceWith($(this).html());
                         break;
                     case 'ntInject':
-                        jq.empty();
+                        jq.html($(this).html());
+                        break;
                     case 'ntPrepend':
                         jq.prepend($(this).html());
                         break;
