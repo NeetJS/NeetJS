@@ -135,13 +135,13 @@ $(function () {
 <html>
 <head>
 <meta charset="utf-8" />
+<!-- Load classes from body when document.ready triggered -->
+<meta nt-props="/boot/load-from-body" content="true" />
 <script type="text/javascript" src="/res/jquery.min.js"></script>
 <script type="text/javascript" src="/res/jquery.neet.js"></script>
 <!-- Init process -->
 <script type="text/javascript">
 $(function () {
-    // Load classes
-    $.neetjs.loadFromBody();
     $('.addBtn').click(function () {
         // Call a render method
         $('body').ntAppend({'class': 'org-neetjs-demo-hello'});
@@ -242,8 +242,6 @@ $('body').ntInject({
 ```
 
 option中“class”域会告诉NeetJS我们这次渲染的类是什么，而“data”域则是渲染时使用的数据。这类似于MVC框架中“Controller”层获取数据，将其封装到“Model”中，然后传给“View”层让其渲染出最终的界面的过程。“class”指出“view”的名字，“data”就是传给“view”的“model”。
-
-***TODO: Add Example***
 
 ---
 
@@ -575,19 +573,7 @@ NeetJS类定义：
 <p   nt-after="{...}"></p><!-- use $(this).ntAfter({...})   -->
 ```
 
-To be continue...
-
-***TODO: Add Example for replace***
-
-***TODO: Add Example for inject***
-
-***TODO: Add Example for prepend***
-
-***TODO: Add Example for append***
-
-***TODO: Add Example for before***
-
-***TODO: Add Example for after***
+（实例准备中）
 
 ---
 
@@ -667,36 +653,4 @@ $(function () {
 ...
 ```
 
-***TODO: Add Example***
-
----
-
-### 组合指令
-
-To be continue...
-
----
-
-### 类装载器（ClassLoader）
-
-To be continue...
-
----
-
-### 与AJAX结合
-
-教程中大部分例子都是使用静态的数据直接进行页面渲染，然而实际的开发中，“动态生成页面”的这一需求往往是伴随着“动态更新数据”的。本节将给出一个使用AJAX获取数据的例子：
-
-To be continue...
-
----
-
-#NeetJS参考手册
-
-##文档结构
-
-##类装载
-
-##头部
-
-##头部
+（实例准备中）
