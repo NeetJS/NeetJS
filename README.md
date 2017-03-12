@@ -85,7 +85,6 @@ SOFTWARE.
 </div>
 <script type="text/javascript">
 $(function () {
-    $.neetjs.loadFromBody();
     $('body').ntInject({
         'class': 'org-neetjs-demo-hello',
         'data': {'title': 'Mr.', 'name': 'Chen'}
@@ -126,6 +125,7 @@ $(function () {
 
 一个简单的使用了NeetJS的页面结构如下：
 
+* 通过```<meta nt-props="/boot/load-from-body" .../>```来告诉NeetJS在初始化时是否从body中加载NeetJS类。
 * head中引入jQuery和NeetJS。
 * 定义页面加载时的初始化流程或一些使用到NeetJS的函数。
 * body中写入NeetJS类的定义以及body中的其它内容。
@@ -242,6 +242,8 @@ $('body').ntInject({
 ```
 
 option中“class”域会告诉NeetJS我们这次渲染的类是什么，而“data”域则是渲染时使用的数据。这类似于MVC框架中“Controller”层获取数据，将其封装到“Model”中，然后传给“View”层让其渲染出最终的界面的过程。“class”指出“view”的名字，“data”就是传给“view”的“model”。
+
+[亲自试一下](https://neetjs.github.io/demo/#tutorial_case_methods)
 
 ---
 
