@@ -267,7 +267,6 @@ nt-html可以用于将变量/运算结果作为元素的内部html代码注入�
 </div>
 <script type="text/javascript">
 $(function () {
-    $.neetjs.loadFromBody();
     $('body').ntInject({
         'class': 'org-neetjs-demo-hello',
         'data': {'textHeader': 'This is h1.', 'textContent': 'This is p.'}
@@ -304,7 +303,6 @@ nt-attr可以用于将变量/运算结果作为赋值给元素的属性，有两
 </div>
 <script type="text/javascript">
 $(function () {
-    $.neetjs.loadFromBody();
     $('body').ntInject({
         'class': 'org-neetjs-demo-hello',
         'data': {'userId': '1001', 'imgClass': 'aCssClass'}
@@ -346,7 +344,6 @@ $(function () {
 </div>
 <script type="text/javascript">
 $(function () {
-    $.neetjs.loadFromBody();
     $('body').ntInject({
         'class': 'org-neetjs-demo-hello',
         'data': {'hour': new Date().getHours()}
@@ -425,7 +422,6 @@ foreach ($variable as $key => $value) {
 </div>
 <script type="text/javascript">
 $(function () {
-    $.neetjs.loadFromBody();
     $('body').ntInject({
         'class': 'org-neetjs-demo-hello',
         'data': {'staffs': [
@@ -585,7 +581,6 @@ NeetJS类定义：
 
 nt-eval的功能是在程序上下文中执行一段纯JavaScript代码，当NeetJS渲染到带有nt-eval属性的标签时，便会将该属性的值作为JavaScript代码直接执行，此外，这段代码中的“this”指针将代表该元素本身。
 
-
 nt-eval可以说是功能最强大的一个渲染属性，任何其它渲染属性的功能都能用nt-eval实现，但我们并不建议您在nt-eval中执行过度复杂的代码，因为这会降低您代码的可维护性。nt-eval的主要用途有两种：
 * 通过this指针对本元素做一些数据操作，比如绑定事件、调用第三方库等。
 * 更改上下文中变量的值。
@@ -603,7 +598,6 @@ nt-eval可以说是功能最强大的一个渲染属性，任何其它渲染属�
 </div>
 <script type="text/javascript">
 $(function () {
-    $.neetjs.loadFromBody();
     $('body').ntInject({'class': 'org-neetjs-demo-hello'});
 });
 </script>
@@ -632,13 +626,12 @@ nt-remove的功能很简单，NeetJS在渲染处理完带有nt-remove属性的�
 <div nt-class="org-neetjs-demo-hello">
 <div nt-body>
     <p>Before</p>
-    <p nt-eval="console.log('debug');" nt-remove></p>
+    <p nt-eval="console.log('debug');" nt-remove>Removed</p>
     <p>After</p>
 </div>
 </div>
 <script type="text/javascript">
 $(function () {
-    $.neetjs.loadFromBody();
     $('body').ntInject({'class': 'org-neetjs-demo-hello'});
 });
 </script>
@@ -655,4 +648,4 @@ $(function () {
 ...
 ```
 
-（实例准备中）
+[亲自试一下](https://neetjs.github.io/demo/#tutorial_case_nt_remove)
