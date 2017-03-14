@@ -11,7 +11,7 @@ NeetJS是一个jQuery插件，它实现了一个轻量级的Web前端MVC框架�
 NeetJS目前尚处于开发和公测阶段，可以从GitHub的master分支检出最新的测试版本：
 
 ```
-git clone https://github.com/prchen-open/NeetJS.git
+git clone https://github.com/NeetJS/NeetJS.git
 ```
 
 ##MIT License
